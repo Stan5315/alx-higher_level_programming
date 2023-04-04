@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# 7-rectangle.py
 """Defines a Rectangle class."""
 
 
@@ -24,7 +25,7 @@ class Rectangle:
 
     @property
     def width(self):
-        """Get/set the width of the rectangle."""
+        """Get/set the width of the Rectangle."""
         return self.__width
 
     @width.setter
@@ -37,7 +38,7 @@ class Rectangle:
 
     @property
     def height(self):
-        """Get/set the height of the rectangle."""
+        """Get/set the height of the Rectangle."""
         return self.__height
 
     @height.setter
@@ -67,7 +68,7 @@ class Rectangle:
 
         rect = []
         for i in range(self.__height):
-            [rect.append('#') for j in range(self.__width)]
+            [rect.append(str(self.print_symbol)) for j in range(self.__width)]
             if i != self.__height - 1:
                 rect.append("\n")
         return ("".join(rect))
