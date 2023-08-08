@@ -1,40 +1,40 @@
 #!/usr/bin/python3
+"""
+    This module contains a function that queries the
+    Reddit API and returns a list of the hottest post for
+    a given subreddit.
+"""
 import requests
-"""
-function that queries reddit api
-"""
 
 
-def recurse(subreddit, hot_list=[]):
+def recurse(subreddit, hot_list=[], after=None):
     """
-    recursive function that queries the reddit api and returns a list
-    containing the titles of all hot articles for a given reddit.
-    if no results are found for the given subreddit the function
-    should return none
+        returns a list of the hottest posts of a subreddit
+        or None
     """
-    if type(subreddit) is list:
-        url = "https://api.reddit.com/r/{}?sort=hot".format(subreddit[0])
-        url = "{}&after={}".format(url, subreddit[1])
+    u_agent = {'User-Agent': '/u/Suspicious-Jelly920'}
+    url = 'https://api.reddit.com/r/{}/hot?after={}'.format(subreddit, after)
+    res = requests.get(url,  headers=u_agent)
+    h_list = []
+    if res.status_code == 200:
+        hottest = res.json()["data"]["children"]
+        after = res.json()["data"]["after"]
+
+        if after is None:
+            h_list = get_children(hottest, len(hottest))
+            return h_list
+        h_list.append(recurse(subreddit, h_list, after=after))
+        h_list = get_children(hottest, len(hottest))
     else:
-        url = "https://api.reddit.com/r/{}?sort=hot".format(subreddit)
-        subreddit = [subreddit, ""]
-    header = {'User-Agent': 'CustomClient/1.0'}
-    req = requests.get(url, headers=header, allow_redirects=False)
-    if req.status_code != 200:
-        return (None)
-    req = req.json()
-    if "data" in req:
-        data = req.get("data")
-        if not data.get("children"):
-            return (hot_list)
-        for post in data.get("children"):
-            hot_list += [post.get("data").get("title")]
-        if not data.get("after"):
-            return (hot_list)
-        subreddit[1] = data.get("after")
-        recurse(subreddit, hot_list)
-        if hot_list[-1] is None:
-            del hot_list[-1]
-        return (hot_list)
-    else:
-        return (None)
+        return None
+    return h_list
+
+
+def get_children(h_list, count, new_hlist=[]):
+    """
+        gets the children from the data
+    """
+    if count == 0:
+        return new_hlist
+    new_hlist.append(h_list[count - 1]["data"]["title"])
+    return (get_children(h_list, count - 1, new_hlist))
